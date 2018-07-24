@@ -107,3 +107,4 @@ venv.bak/
 *.bak
 models/mapping.pkl
 dataset
+models

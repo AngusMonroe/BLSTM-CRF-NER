@@ -146,7 +146,7 @@ def prepare_data(sentence, word_to_id, char_to_id, tag_to_id, lower=True):
     caps = [cap_feature(w) for w in str_words]
     # tags = [tag_to_id[w[-1]] for w in sentence]
     tags = ['' for w in sentence]
-    data={
+    data = {
         'str_words': str_words,
         'words': words,
         'chars': chars,
@@ -192,33 +192,26 @@ def augment_with_pretrained(dictionary, ext_emb_path, words):
     word_to_id, id_to_word = create_mapping(dictionary)
     return dictionary, word_to_id, id_to_word
 
-def evaluating(model, data, best_F):
-    prediction = []
-    save = False
-    new_F = 0.0
-    confusion_matrix = torch.zeros((len(tag_to_id) - 2, len(tag_to_id) - 2))
+
+def evaluating(model, data):
 
     # ground_truth_id = data['tags']
     words = data['str_words']
     chars2 = data['chars']
     caps = data['caps']
-    print(chars2)
-    print(type(chars2))
 
     chars2_sorted = sorted(chars2, key=lambda p: len(p), reverse=True)
-    print(chars2)
-    print(chars2_sorted)
     d = {}
     for i, ci in enumerate(chars2):
         for j, cj in enumerate(chars2_sorted):
             if ci == cj and not j in d and not i in list(d.values()):
                 d[j] = i
                 continue
-    print(d)
+
     chars2_length = [len(c) for c in chars2_sorted]
     char_maxl = max(chars2_length)
     chars2_mask = np.zeros((len(chars2_sorted), char_maxl), dtype='int')
-    print(chars2_mask)
+
     for i, c in enumerate(chars2_sorted):
         chars2_mask[i, :chars2_length[i]] = c
     chars2_mask = Variable(torch.LongTensor(chars2_mask))
@@ -227,46 +220,7 @@ def evaluating(model, data, best_F):
     dcaps = Variable(torch.LongTensor(caps))
 
     val, out = model(dwords, chars2_mask, dcaps, chars2_length, d)
-    predicted_id = out
-    print(predicted_id)
-    # for (word, true_id, pred_id) in zip(words, ground_truth_id, predicted_id):
-    #     line = ' '.join([word, id_to_tag[true_id], id_to_tag[pred_id]])
-    #     prediction.append(line)
-    #     confusion_matrix[true_id, pred_id] += 1
-    # prediction.append('')
-    #
-    # print(prediction)
-
-    # predf = eval_temp + '/pred.' + name
-    # scoref = eval_temp + '/score.' + name
-    #
-    # with open(predf, 'wb') as f:
-    #     f.write(bytes('\n'.join(prediction), encoding="utf8"))
-    #
-    # os.system('%s < %s > %s' % (eval_script, predf, scoref))
-    #
-    # eval_lines = [l.rstrip() for l in codecs.open(scoref, 'r', 'utf8')]
-    #
-    # for i, line in enumerate(eval_lines):
-    #     print(line)
-    #     if i == 1:
-    #         new_F = float(line.strip().split()[-1])
-    #         if new_F > best_F:
-    #             best_F = new_F
-    #             save = True
-    #             print('the best F is ', new_F)
-    #
-    # print(("{: >2}{: >7}{: >7}%s{: >9}" % ("{: >7}" * confusion_matrix.size(0))).format(
-    #     "ID", "NE", "Total",
-    #     *([id_to_tag[i] for i in range(confusion_matrix.size(0))] + ["Percent"])
-    # ))
-    # for i in range(confusion_matrix.size(0)):
-    #     print(("{: >2}{: >7}{: >7}%s{: >9}" % ("{: >7}" * confusion_matrix.size(0))).format(
-    #         str(i), id_to_tag[i], str(confusion_matrix[i].sum()),
-    #         *([confusion_matrix[i][j] for j in range(confusion_matrix.size(0))] +
-    #           ["%.3f" % (confusion_matrix[i][i] * 100. / max(1, confusion_matrix[i].sum()))])
-    #     ))
-    # return best_F, new_F, save
+    return out
 
 if __name__ == "__main__":
     train_sentences = load_sentences("dataset/train.dat", lower=True, zeros=0)
@@ -286,9 +240,6 @@ if __name__ == "__main__":
         temp_word.append('')
         data.append(temp_word)
 
-    print(data)
-    print(type(data))
-
     dico_chars, char_to_id, id_to_char = char_mapping(train_sentences)
     dico_tags, tag_to_id, id_to_tag = tag_mapping(train_sentences)
 
@@ -296,9 +247,18 @@ if __name__ == "__main__":
         data, word_to_id, char_to_id, tag_to_id, lower=True
     )
 
-    print(input_data)
-    print(type(input_data))
-
-    # best_dev_F, new_dev_F, save = evaluating(model="models/test", input_data, best_dev_F)
     model = torch.load('models/test', map_location='cpu')
-    evaluating(model=model, data=input_data, best_F=0)
+    model.use_gpu = 0
+    prediction_id = evaluating(model=model, data=input_data)
+    prediction_tag = []
+    for id in prediction_id:
+        prediction_tag.append(id_to_tag[id])
+
+    ans = []
+    for w, t in zip(word, prediction_tag):
+        tuple = {
+            'word': w,
+            'tag': t
+        }
+        ans.append(tuple)
+    print(ans)
