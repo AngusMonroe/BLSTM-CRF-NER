@@ -240,6 +240,16 @@ if __name__ == "__main__":
         temp_word.append('')
         data.append(temp_word)
 
+    # test_file = open("dataset/train_test.dat", "r", encoding="utf8")
+    # data = []
+    # for line in test_file.readlines():
+    #     # print(line)
+    #     word = line.split()
+    #     if len(word) < 2:
+    #         break
+    #     temp_word = [word[0], word[1]]
+    #     data.append(temp_word)
+
     dico_chars, char_to_id, id_to_char = char_mapping(train_sentences)
     dico_tags, tag_to_id, id_to_tag = tag_mapping(train_sentences)
 
