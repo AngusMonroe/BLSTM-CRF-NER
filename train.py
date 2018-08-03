@@ -390,9 +390,9 @@ for epoch in range(1, 21):
             neg_log_likelihood = model.neg_log_likelihood(sentence_in.cuda(), targets.cuda(), chars2_mask.cuda(), caps.cuda(), chars2_length, d)
         else:
             neg_log_likelihood = model.neg_log_likelihood(sentence_in, targets, chars2_mask, caps, chars2_length, d)
-        loss += neg_log_likelihood.data[0] / len(data['words'])
+        loss += neg_log_likelihood.item() / len(data['words'])
         neg_log_likelihood.backward()
-        torch.nn.utils.clip_grad_norm(model.parameters(), 5.0)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
         optimizer.step()
 
         if count % plot_every == 0:
@@ -419,7 +419,7 @@ for epoch in range(1, 21):
             best_test_F, new_test_F, _ = evaluating(model, test_data, best_test_F)
             sys.stdout.flush()
 
-            all_F.append([new_train_F, new_dev_F, new_test_F])
+            # all_F.append([new_train_F, new_dev_F, new_test_F])
             # Fwin = 'F-score of {train, dev, test}_' + name
             # vis.line(np.array(all_F), win=Fwin,
             #      X=np.array([eval_every*i for i in range(len(all_F))]),
