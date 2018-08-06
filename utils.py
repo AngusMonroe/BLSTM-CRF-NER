@@ -221,6 +221,7 @@ def init_linear(input_linear):
     if input_linear.bias is not None:
         input_linear.bias.data.zero_()
 
+
 def adjust_learning_rate(optimizer, lr):
     """
     shrink learning rate for pytorch

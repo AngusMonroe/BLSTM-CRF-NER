@@ -222,15 +222,15 @@ def evaluating(model, data):
     val, out = model(dwords, chars2_mask, dcaps, chars2_length, d)
     return out
 
-if __name__ == "__main__":
-    train_sentences = load_sentences("dataset/train.dat", lower=True, zeros=0)
-    dico_words_train = word_mapping(train_sentences, lower=True)[0]
-    dico_words, word_to_id, id_to_word = augment_with_pretrained(
-        dico_words_train.copy(),
-        "models/glove.6B.100d.txt", None
-    )
+train_sentences = load_sentences("dataset/train.dat", lower=True, zeros=0)
+dico_words_train = word_mapping(train_sentences, lower=True)[0]
+dico_words, word_to_id, id_to_word = augment_with_pretrained(
+    dico_words_train.copy(),
+    "models/glove.6B.100d.txt", None
+)
 
-    txt = "Tsinghua 2012 Jie Tang"
+
+def test(txt):
     txt = txt.rstrip()
     word = txt.split()
     data = []
@@ -264,11 +264,43 @@ if __name__ == "__main__":
     for id in prediction_id:
         prediction_tag.append(id_to_tag[id])
 
-    ans = []
+    loc = []
+    per = []
+    con = []
+    date = []
+    org = []
+    key = []
+    o = []
+    # dicts = [loc, per, con, date, org, key, o]
     for w, t in zip(word, prediction_tag):
-        tuple = {
-            'word': w,
-            'tag': t
-        }
-        ans.append(tuple)
+        tag = t.split('-')
+        if tag[0] == 'DATE':
+            date.append(w)
+        elif tag[0] == 'O':
+            o.append(w)
+        elif tag[1] == 'LOC':
+            loc.append(w)
+        elif tag[1] == 'PER':
+            per.append(w)
+        elif tag[1] == 'CON':
+            con.append(w)
+        elif tag[1] == 'ORG':
+            org.append(w)
+        elif tag[1] == 'KEY':
+            key.append(w)
+
+    ans = {
+        'LOC': loc,
+        'PER': per,
+        'CON': con,
+        'DATE': date,
+        'ORG': org,
+        'KEY': key,
+        'O': o
+    }
     print(ans)
+    return ans
+
+if __name__ == "__main__":
+    txt = "Tsinghua 2012 Jie Tang"
+    test(txt)

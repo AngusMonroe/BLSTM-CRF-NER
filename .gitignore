@@ -108,3 +108,4 @@ venv.bak/
 models/mapping.pkl
 dataset
 models
+evaluation
