@@ -175,7 +175,7 @@ class BiLSTM_CRF(nn.Module):
             tag_var = forward_var + self.transitions + emit_score
             max_tag_var, _ = torch.max(tag_var, dim=1)
             tag_var = tag_var - max_tag_var.view(-1, 1)
-            forward_var = max_tag_var + torch.log(torch.sum(torch.exp(tag_var), dim=1)).view(1, -1) # ).view(1, -1)
+            forward_var = max_tag_var + torch.log(torch.sum(torch.exp(tag_var), dim=1)).view(1, -1)
         terminal_var = (forward_var + self.transitions[self.tag_to_ix[STOP_TAG]]).view(1, -1)
         alpha = log_sum_exp(terminal_var)
         # Z(x)
@@ -210,9 +210,14 @@ class BiLSTM_CRF(nn.Module):
         for bptrs_t in reversed(backpointers):
             best_tag_id = bptrs_t[best_tag_id]
             best_path.append(best_tag_id)
+        # print(best_path)
+        # print(self.tag_to_ix)
+        # print(START_TAG)
         start = best_path.pop()
         assert start == self.tag_to_ix[START_TAG]
         best_path.reverse()
+        # print(best_path)
+        # print(type(best_path))
         return path_score, best_path
 
     def neg_log_likelihood(self, sentence, tags, chars2, caps, chars2_length, d):
@@ -228,7 +233,6 @@ class BiLSTM_CRF(nn.Module):
             tags = Variable(tags)
             scores = nn.functional.cross_entropy(feats, tags)
             return scores
-
 
     def forward(self, sentence, chars, caps, chars2_length, d):
         feats = self._get_lstm_features(sentence, chars, caps, chars2_length, d)

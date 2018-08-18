@@ -18,6 +18,7 @@ def unicodeToAscii(s):
         and c in string.ascii_letters + " .,;'-"
     )
 
+
 def load_sentences(path, lower, zeros):
     """
     Load sentences. A line must contain at least a word and its tag.
@@ -107,6 +108,7 @@ def tag_mapping(sentences):
     dico[model.STOP_TAG] = -2
     tag_to_id, id_to_tag = create_mapping(dico)
     print("Found %i unique named entity tags" % len(dico))
+    print(dico)
     return dico, tag_to_id, id_to_tag
 
 
@@ -156,6 +158,8 @@ def prepare_dataset(sentences, word_to_id, char_to_id, tag_to_id, lower=True):
     def f(x): return x.lower() if lower else x
     data = []
     for s in sentences:
+        # print(s)
+        # print('!')
         try:
             if s == '' or s == ' ' or s == '\n':
                 continue
@@ -221,6 +225,7 @@ def pad_seq(seq, max_length, PAD_token=0):
     seq += [PAD_token for i in range(max_length - len(seq))]
     return seq
 
+
 def get_batch(start, batch_size, datas, singletons=[]):
     input_seqs = []
     target_seqs = []
@@ -275,7 +280,6 @@ def random_batch(batch_size, train_data, singletons=[]):
     target_seqs = []
     chars2_seqs = []
 
-
     for i in range(batch_size):
         # pair is chosen from pairs randomly
         data = random.choice(train_data)
@@ -317,18 +321,3 @@ def random_batch(batch_size, train_data, singletons=[]):
     #     target_var = target_var.cuda()
 
     return input_padded, input_lengths, target_padded, target_lengths, chars2_seqs_padded, chars2_seqs_lengths
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

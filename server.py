@@ -13,6 +13,7 @@ app = Flask(__name__)
 # from evaluate import get_ne
 print('============ ner imported ==========')
 
+
 def ans(query):
     # remain, dic['time'] = parse_year_range(query)
     # dic['time'] = str(dic['time'])
@@ -25,6 +26,7 @@ def ans(query):
     # dic['entities'] =  or_tags
     # dic['documents'], dic['suggest']  = router(dic['intent'], uniq_dic)
     return json.dumps(res)
+
 
 @app.route('/query/<query>')
 def QA(query):
@@ -40,5 +42,5 @@ def QA(query):
         return 'hello world'
 
 if __name__ == '__main__':
-    app.debug=True
+    app.debug = True
     app.run(host='0.0.0.0', port=5011)

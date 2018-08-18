@@ -39,7 +39,7 @@ optparser.add_option(
     help='score file location'
 )
 optparser.add_option(
-    "-s", "--tag_scheme", default="iobes",
+    "-s", "--tag_scheme", default="iob",
     help="Tagging scheme (IOB or IOBES)"
 )
 optparser.add_option(
@@ -412,6 +412,7 @@ for epoch in range(1, 21):
         if count % (eval_every) == 0 and count > (eval_every * 20) or \
                 count % (eval_every*4) == 0 and count < (eval_every * 20):
             model.train(False)
+            # torch.save(model, model_name)
             best_train_F, new_train_F, _ = evaluating(model, test_train_data, best_train_F)
             best_dev_F, new_dev_F, save = evaluating(model, dev_data, best_dev_F)
             if save:
