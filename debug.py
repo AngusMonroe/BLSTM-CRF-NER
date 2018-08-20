@@ -48,6 +48,12 @@ dico_words, word_to_id, id_to_word = augment_with_pretrained(
     "models/glove.6B.100d.txt", None
 )
 
+dico_chars, char_to_id, id_to_char = char_mapping(train_sentences)
+dico_tags, tag_to_id, id_to_tag = tag_mapping(train_sentences)
+
+model = torch.load('models/aminer', map_location='cpu')
+model.use_gpu = 0
+
 
 def test(txt):
     txt = txt.lower()
@@ -75,26 +81,19 @@ def test(txt):
     # update_tag_scheme(sentences, "iob")
     # [3, 4, 0, 6, 7, 9, 13, 10, 0, 0, 0, 0, 16]
 
-    dico_chars, char_to_id, id_to_char = char_mapping(train_sentences)
-    dico_tags, tag_to_id, id_to_tag = tag_mapping(train_sentences)
-
     input_data = prepare_dataset(
         sentences, word_to_id, char_to_id, tag_to_id, lower=True
     )
-
-    print(sentences)
-    # print(input_data)
-
-    model = torch.load('models/aminer', map_location='cpu')
-    model.use_gpu = 0
     prediction_id = evaluate(model=model, datas=input_data)
     print(prediction_id)
     print(id_to_tag)
+
     prediction_tag = []
     for id in prediction_id:
         prediction_tag.append(id_to_tag[id])
+    print(sentences)
+    # print(input_data)
 
-    loc = []
     per = []
     con = []
     date = []
@@ -103,15 +102,15 @@ def test(txt):
     o = []
     # dicts = [loc, per, con, date, org, key, o]
     for w, id in zip(word, prediction_id):
-        if id == 2 or id == 4:
+        if id == tag_to_id['I-ORG'] or id == tag_to_id['B-ORG']:
             org.append(w)
-        elif id == 3 or id == 6:
+        elif id == tag_to_id['I-KEY'] or id == tag_to_id['B-KEY']:
             key.append(w)
-        elif id == 5 or id == 8:
+        elif id == tag_to_id['I-PER'] or id == tag_to_id['B-PER']:
             per.append(w)
-        elif id == 1 or id == 9:
+        elif id == tag_to_id['I-CON'] or id == tag_to_id['B-CON']:
             con.append(w)
-        elif id == 7:
+        elif id == tag_to_id['B-DATE']:
             date.append(w)
         else:
             o.append(w)
