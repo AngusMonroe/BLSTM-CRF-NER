@@ -9,6 +9,7 @@ import numpy as np
 import itertools
 from torch.autograd import Variable
 from loader import *
+import json
 
 
 def evaluate(model, datas):
@@ -42,6 +43,7 @@ def evaluate(model, datas):
     return out
 
 train_sentences = load_sentences("dataset/aminer_segment/aminer_train.dat", lower=True, zeros=0)
+update_tag_scheme(train_sentences, 'iob')
 dico_words_train = word_mapping(train_sentences, lower=True)[0]
 dico_words, word_to_id, id_to_word = augment_with_pretrained(
     dico_words_train.copy(),
@@ -60,7 +62,7 @@ def test(txt):
     txt = txt.rstrip()
     word = txt.split()
     print(word)
-    file = open('dataset/api.txt', 'w', encoding='utf8')
+    file = open('dataset/api.txt', 'w')
     for w in word:
         file.write(w + ' O\n')
     file.write('\n-DOCSTART- -X- O O')
