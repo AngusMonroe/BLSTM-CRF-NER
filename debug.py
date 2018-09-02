@@ -96,36 +96,72 @@ def test(txt):
     print(sentences)
     # print(input_data)
 
-    per = []
-    con = []
-    date = []
-    org = []
-    key = []
-    o = []
-    # dicts = [loc, per, con, date, org, key, o]
-    for w, id in zip(word, prediction_id):
-        if id == tag_to_id['I-ORG'] or id == tag_to_id['B-ORG']:
-            org.append(w)
-        elif id == tag_to_id['I-KEY'] or id == tag_to_id['B-KEY']:
-            key.append(w)
-        elif id == tag_to_id['I-PER'] or id == tag_to_id['B-PER']:
-            per.append(w)
-        elif id == tag_to_id['I-CON'] or id == tag_to_id['B-CON']:
-            con.append(w)
-        elif id == tag_to_id['B-DATE']:
-            date.append(w)
-        else:
-            o.append(w)
+    # per = []
+    # con = []
+    # date = []
+    # org = []
+    # key = []
+    # o = []
+    # # dicts = [loc, per, con, date, org, key, o]
+    # for w, id in zip(word, prediction_id):
+    #     if id == tag_to_id['I-ORG'] or id == tag_to_id['B-ORG']:
+    #         org.append(w)
+    #     elif id == tag_to_id['I-KEY'] or id == tag_to_id['B-KEY']:
+    #         key.append(w)
+    #     elif id == tag_to_id['I-PER'] or id == tag_to_id['B-PER']:
+    #         per.append(w)
+    #     elif id == tag_to_id['I-CON'] or id == tag_to_id['B-CON']:
+    #         con.append(w)
+    #     elif id == tag_to_id['B-DATE']:
+    #         date.append(w)
+    #     else:
+    #         o.append(w)
+    #
+    # ans = {
+    #     'PER': per,
+    #     'CON': con,
+    #     'DATE': date,
+    #     'ORG': org,
+    #     'KEY': key,
+    #     'O': o
+    # }
+    # print(ans)
+    # return ans
 
+    label = ['DATE', 'ORG', 'KEY', 'PER', 'CON']
     ans = {
-        'PER': per,
-        'CON': con,
-        'DATE': date,
-        'ORG': org,
-        'KEY': key,
-        'O': o
+        'PER': [],
+        'CON': [],
+        'DATE': [],
+        'ORG': [],
+        'KEY': [],
+        'O': []
     }
-    print(ans)
+
+    stat = None
+    tmp = ''
+    for w, i in zip(word, prediction_id):
+        found_b = False
+        for s in label:
+            if i == tag_to_id['B-' + s]:
+                if stat is not None:
+                    ans[stat].append(tmp)
+                stat = s
+                tmp = w
+                found_b = True
+                break
+        if found_b:
+            continue
+        else:
+            if stat is not None and 'I-' + stat in tag_to_id and i == tag_to_id['I-' + stat]:
+                tmp += ' ' + w
+            else:
+                if stat is not None:
+                    ans[stat].append(tmp)
+                stat = 'O'
+                tmp = w
+    if stat is not None:
+        ans[stat].append(tmp)
     return ans
 
 if __name__ == "__main__":
