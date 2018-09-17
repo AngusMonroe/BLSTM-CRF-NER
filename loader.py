@@ -49,7 +49,7 @@ def update_tag_scheme(sentences, tag_scheme):
     Only IOB1 and IOB2 schemes are accepted.
     """
     for i, s in enumerate(sentences):
-        tags = [w[-1] for w in s]
+        tags = [w[-1].upper() for w in s]
         # Check that tags are given in the IOB format
         if not iob2(tags):
             s_str = '\n'.join(' '.join(w) for w in s)
@@ -169,6 +169,8 @@ def prepare_dataset(sentences, word_to_id, char_to_id, tag_to_id, lower=True):
             # Skip characters that are not in the training set
             chars = [[char_to_id[c] for c in w if c in char_to_id]
                      for w in str_words]
+            chars = [w if len(w) else [0]
+                     for w in chars]
             caps = [cap_feature(w) for w in str_words]
             tags = [tag_to_id[w[-1]] for w in s]
             data.append({
@@ -197,7 +199,7 @@ def augment_with_pretrained(dictionary, ext_emb_path, words):
     pretrained = set([
         line.rstrip().split()[0].strip()
         for line in codecs.open(ext_emb_path, 'r', 'utf-8')
-        if len(ext_emb_path) > 0
+        if len(ext_emb_path) > 0 and len(line.rstrip().split()) > 0
     ])
 
     # We either add every word in the pretrained file,
