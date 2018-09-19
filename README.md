@@ -16,6 +16,15 @@ python3.6
 
 pytorch
 
+## Data Format
+
+train data at `./dataset/aminer_train.dat`
+
+```
+<word> <label>
+```
+
+
 ## usage:
 
 train model:
